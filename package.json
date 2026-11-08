@@ -1,0 +1,22 @@
+{
+  "name": "g-circle",
+  "version": "1.0.0",
+  "description": "G-CIRCLE - University Collaboration Ecosystem: Discover. Collaborate. Build.",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "client": "npm --prefix client run dev",
+    "server": "npm --prefix server run dev",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"magenta,cyan\" \"npm run server\" \"npm run client\"",
+    "db:start": "node server/src/scripts/start-db.js",
+    "db:migrate": "npm --prefix server run db:migrate",
+    "db:seed": "npm --prefix server run db:seed",
+    "db:studio": "npm --prefix server run db:studio"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

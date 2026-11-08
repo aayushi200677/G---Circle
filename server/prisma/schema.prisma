@@ -1,0 +1,391 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model University {
+  id          String       @id @default(uuid())
+  name        String
+  code        String       @unique
+  domain      String       @unique
+  location    String
+  departments Department[]
+  users       User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("universities")
+}
+
+model Department {
+  id           String     @id @default(uuid())
+  name         String
+  code         String
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  users        User[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("departments")
+}
+
+model User {
+  id             String      @id @default(uuid())
+  name           String
+  studentId      String      @unique
+  email          String      @unique
+  password       String
+  academicYear   String      // "1st Year", "2nd Year", "3rd Year", "4th Year"
+  course         String      // "B.Tech CSE", "B.Tech IT", etc.
+  departmentId   String?
+  department     Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  universityId   String?
+  university     University? @relation(fields: [universityId], references: [id], onDelete: SetNull)
+  avatar         String?
+  linkedin       String?
+  github         String?
+  bio            String?
+  experience     String?
+  availability   String?     @default("Flexible") // "Morning", "Afternoon", "Evening", "Flexible"
+  preferredRoles String[]    @default([])
+  emailVerified  Boolean     @default(false)
+  role           String      @default("STUDENT")  // "STUDENT", "TEAM_LEADER", "ADMIN"
+
+  skills               UserSkill[]
+  interests            UserInterest[]
+  communicationSkills  UserCommunicationSkill[]
+  languages            UserLanguage[]
+  preferences          UserPreference?
+  createdProjects      Project[]                  @relation("ProjectCreator")
+  ledTeams             Team[]                     @relation("TeamLeader")
+  teamMemberships      TeamMember[]
+  teamRequests         TeamRequest[]
+  assignedTasks        Task[]                     @relation("TaskAssignee")
+  createdTasks         Task[]                     @relation("TaskCreator")
+  sentMessages         Message[]
+  notifications        Notification[]
+  givenFeedback        PeerFeedback[]             @relation("FeedbackFrom")
+  receivedFeedback     PeerFeedback[]             @relation("FeedbackTo")
+  passwordResetTokens  PasswordResetToken[]
+  showcaseVideos       ShowcaseVideo[]
+
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+
+  @@map("users")
+}
+
+model Skill {
+  id            String         @id @default(uuid())
+  name          String         @unique
+  category      String         // "Frontend", "Backend", "AI/ML", "DevOps", "Database", "Design", "Mobile", "Other"
+  description   String?
+  userSkills    UserSkill[]
+  projectSkills ProjectSkill[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("skills")
+}
+
+model UserSkill {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillId     String
+  skill       Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  proficiency Int      // 1=Beginner, 2=Intermediate, 3=Advanced, 4=Expert
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, skillId])
+  @@map("user_skills")
+}
+
+model UserInterest {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interest  String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, interest])
+  @@map("user_interests")
+}
+
+model Project {
+  id                       String                            @id @default(uuid())
+  title                    String
+  description              String
+  projectType              String                            // "Hackathon", "Academic", "Research", "Open Source", "Startup", "Competition"
+  requiredTeamSize         Int                               @default(4)
+  difficulty               String                            @default("Intermediate") // "Beginner", "Intermediate", "Advanced", "Expert"
+  deadline                 DateTime?
+  status                   String                            @default("RECRUITING") // "RECRUITING", "IN_PROGRESS", "COMPLETED"
+  creatorId                String
+  creator                  User                              @relation("ProjectCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  skills                   ProjectSkill[]
+  roles                    ProjectRole[]
+  team                     Team?
+  communicationRequirement ProjectCommunicationRequirement?
+  repositories             Repository[]
+  createdAt                DateTime                          @default(now())
+  updatedAt                DateTime                          @updatedAt
+
+  @@map("projects")
+}
+
+model ProjectSkill {
+  id         String   @id @default(uuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  skillId    String
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  importance Int      @default(3) // 1 to 5
+  createdAt  DateTime @default(now())
+
+  @@unique([projectId, skillId])
+  @@map("project_skills")
+}
+
+model ProjectRole {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  roleName  String
+  openCount Int      @default(1)
+  createdAt DateTime @default(now())
+
+  @@map("project_roles")
+}
+
+model Team {
+  id            String         @id @default(uuid())
+  name          String
+  projectId     String         @unique
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  leaderId      String
+  leader        User           @relation("TeamLeader", fields: [leaderId], references: [id], onDelete: Cascade)
+  members       TeamMember[]
+  requests      TeamRequest[]
+  tasks         Task[]
+  messages      Message[]
+  peerFeedbacks PeerFeedback[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id       String   @id @default(uuid())
+  teamId   String
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String   @default("Member")
+  joinedAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model TeamRequest {
+  id        String   @id @default(uuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String?
+  status    String   @default("PENDING") // "PENDING", "ACCEPTED", "REJECTED"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([teamId, userId])
+  @@map("team_requests")
+}
+
+model Task {
+  id           String    @id @default(uuid())
+  teamId       String
+  team         Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  assignedToId String?
+  assignedTo   User?     @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  priority     String    @default("MEDIUM") // "LOW", "MEDIUM", "HIGH", "URGENT"
+  status       String    @default("TODO")   // "TODO", "IN_PROGRESS", "DONE"
+  dueDate      DateTime?
+  createdById  String
+  createdBy    User      @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("tasks")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@map("messages")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("SYSTEM") // "JOIN_REQUEST", "REQUEST_ACCEPTED", "REQUEST_REJECTED", "TASK_ASSIGNED", "SYSTEM"
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model Repository {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  repoUrl   String
+  provider  String   @default("GITHUB")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("repositories")
+}
+
+model CommunicationSkill {
+  id          String                   @id @default(uuid())
+  name        String                   @unique
+  description String?
+  userSkills  UserCommunicationSkill[]
+  createdAt   DateTime                 @default(now())
+
+  @@map("communication_skills")
+}
+
+model UserCommunicationSkill {
+  id                   String             @id @default(uuid())
+  userId               String
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communicationSkillId String
+  communicationSkill   CommunicationSkill @relation(fields: [communicationSkillId], references: [id], onDelete: Cascade)
+  proficiency          Int                @default(3) // 1 to 4
+  createdAt            DateTime           @default(now())
+
+  @@unique([userId, communicationSkillId])
+  @@map("user_communication_skills")
+}
+
+model UserLanguage {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language    String   // "English", "Hindi", "Other"
+  proficiency String   @default("Fluent")
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, language])
+  @@map("user_languages")
+}
+
+model UserPreference {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communicationMethods String[] @default(["Text-based communication", "Voice discussions"])
+  collaborationStyle   String   @default("Brainstorming together")
+  availability         String   @default("Flexible") // "Morning", "Afternoon", "Evening", "Flexible"
+  themeMode            String   @default("light")    // "light", "dark", "system"
+  themeIntensity       String   @default("classic")  // "soft", "classic", "rich"
+  emailNotifications   Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+model ProjectCommunicationRequirement {
+  id               String   @id @default(uuid())
+  projectId        String   @unique
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  preferredStyle   String?
+  meetingFrequency String?
+  primaryLanguage  String   @default("English")
+  createdAt        DateTime @default(now())
+
+  @@map("project_communication_requirements")
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
+  token     String   @unique
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("email_verifications")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+model PeerFeedback {
+  id         String   @id @default(uuid())
+  fromUserId String
+  fromUser   User     @relation("FeedbackFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User     @relation("FeedbackTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  rating     Int      // 1 to 5
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@map("peer_feedback")
+}
+
+model ShowcaseVideo {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  category     String   // "Self Introduction", "Public Speaking", etc.
+  description  String?
+  storageKey   String   // local file path or key
+  videoUrl     String   // streaming URL or relative path
+  thumbnailUrl String?
+  duration     Int      @default(60) // in seconds
+  skillTags    String[] @default([])
+  visibility   String   @default("PUBLIC") // "PUBLIC", "TEAM_ONLY", "PRIVATE"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("showcase_videos")
+}
+

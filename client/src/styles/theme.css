@@ -1,0 +1,253 @@
+/* ========================================================
+   G-CIRCLE DESIGN SYSTEM & THEME TOKENS
+   STRICT PALETTE: Burgundy, Warm Beige, Ivory
+   ======================================================== */
+
+:root {
+  /* Core Burgundy tokens */
+  --burgundy-900: #35131B;
+  --burgundy-800: #51212E;
+  --burgundy-700: #722F3E;
+  --burgundy-600: #8C4B59;
+  --burgundy-500: #A66B77;
+  --burgundy-400: #C28E98;
+  --burgundy-100: #F3EAEB;
+  --burgundy-50:  #FAF5F6;
+
+  /* Core Warm Beige tokens */
+  --beige-800: #A4917C;
+  --beige-700: #BEAA94;
+  --beige-600: #D8C8B6;
+  --beige-500: #E9DDCE;
+  --beige-400: #F3EBE1;
+  --beige-200: #F8F4EE;
+  --beige-100: #FAF7F2;
+
+  /* Core Ivory tokens */
+  --ivory-white: #FFFFFF;
+  --ivory-50:    #FAF8F4;
+  --ivory-100:   #F5F1EA;
+  --ivory-200:   #EFEAE0;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows (Burgundy-tinted elegant elevation) */
+  --shadow-sm: 0 1px 2px rgba(81, 33, 46, 0.05);
+  --shadow-md: 0 4px 12px rgba(81, 33, 46, 0.08);
+  --shadow-lg: 0 10px 25px rgba(81, 33, 46, 0.12);
+  --shadow-xl: 0 20px 40px rgba(81, 33, 46, 0.16);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+
+/* ========================================================
+   LIGHT MODE VARIATIONS
+   ======================================================== */
+
+/* Light Mode: Classic (Default) */
+[data-theme='light'][data-intensity='classic'],
+[data-theme='light'] {
+  --bg-app: #FAF8F4;
+  --bg-sidebar: #F3EBE1;
+  --bg-navbar: #FAF8F4;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FDFCF9;
+  --bg-surface: #F5F1EA;
+  --bg-surface-accent: #E9DDCE;
+  --bg-input: #FFFFFF;
+
+  --border-subtle: #E9DDCE;
+  --border-strong: #D8C8B6;
+  --border-focus: #722F3E;
+
+  --text-primary: #35131B;
+  --text-secondary: #51212E;
+  --text-muted: #8C4B59;
+  --text-inverse: #FAF8F4;
+
+  --accent-primary: #722F3E;
+  --accent-primary-hover: #51212E;
+  --accent-secondary: #8C4B59;
+  --accent-subtle: #FAF5F6;
+  --accent-border: #A66B77;
+
+  --badge-bg: #F3EAEB;
+  --badge-text: #51212E;
+  --badge-border: #D8C8B6;
+}
+
+/* Light Mode: Soft (Muted, ultra-clean) */
+[data-theme='light'][data-intensity='soft'] {
+  --bg-app: #FAF7F2;
+  --bg-sidebar: #F8F4EE;
+  --bg-navbar: #FAF7F2;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FCFAF6;
+  --bg-surface: #F5EFE6;
+  --bg-surface-accent: #EFE4D4;
+  --bg-input: #FFFFFF;
+
+  --border-subtle: #EFE6DC;
+  --border-strong: #DECFC0;
+  --border-focus: #8C4B59;
+
+  --text-primary: #451F27;
+  --text-secondary: #5E2C37;
+  --text-muted: #9A6671;
+  --text-inverse: #FFFFFF;
+
+  --accent-primary: #8C4B59;
+  --accent-primary-hover: #722F3E;
+  --accent-secondary: #A66B77;
+  --accent-subtle: #FDF9F9;
+  --accent-border: #C28E98;
+
+  --badge-bg: #F7EFEF;
+  --badge-text: #5E2C37;
+  --badge-border: #E5D6C7;
+}
+
+/* Light Mode: Rich (High contrast Burgundy & Warm Beige) */
+[data-theme='light'][data-intensity='rich'] {
+  --bg-app: #F5F1EA;
+  --bg-sidebar: #E9DDCE;
+  --bg-navbar: #F5F1EA;
+  --bg-card: #FAF8F4;
+  --bg-card-hover: #FFFFFF;
+  --bg-surface: #E9DDCE;
+  --bg-surface-accent: #D8C8B6;
+  --bg-input: #FFFFFF;
+
+  --border-subtle: #D8C8B6;
+  --border-strong: #BEAA94;
+  --border-focus: #51212E;
+
+  --text-primary: #250C12;
+  --text-secondary: #3D1620;
+  --text-muted: #722F3E;
+  --text-inverse: #FAF8F4;
+
+  --accent-primary: #51212E;
+  --accent-primary-hover: #35131B;
+  --accent-secondary: #722F3E;
+  --accent-subtle: #F3EBE1;
+  --accent-border: #722F3E;
+
+  --badge-bg: #EFE1E3;
+  --badge-text: #3D1620;
+  --badge-border: #BEAA94;
+}
+
+/* ========================================================
+   DARK MODE VARIATIONS (Deep Burgundy & Warm Beige surfaces)
+   ======================================================== */
+
+/* Dark Mode: Classic (Default Dark) */
+[data-theme='dark'][data-intensity='classic'],
+[data-theme='dark'] {
+  --bg-app: #220B11;
+  --bg-sidebar: #1C080E;
+  --bg-navbar: #220B11;
+  --bg-card: #2E1017;
+  --bg-card-hover: #39151E;
+  --bg-surface: #38141D;
+  --bg-surface-accent: #461B25;
+  --bg-input: #290E14;
+
+  --border-subtle: #4D1F2A;
+  --border-strong: #6B2C3B;
+  --border-focus: #D8C8B6;
+
+  --text-primary: #FAF8F4;
+  --text-secondary: #F3EBE1;
+  --text-muted: #D8C8B6;
+  --text-inverse: #220B11;
+
+  --accent-primary: #8C4B59;
+  --accent-primary-hover: #A66B77;
+  --accent-secondary: #E9DDCE;
+  --accent-subtle: #39151E;
+  --accent-border: #8C4B59;
+
+  --badge-bg: #3E1620;
+  --badge-text: #F3EBE1;
+  --badge-border: #6B2C3B;
+}
+
+/* Dark Mode: Soft */
+[data-theme='dark'][data-intensity='soft'] {
+  --bg-app: #2B1218;
+  --bg-sidebar: #220C12;
+  --bg-navbar: #2B1218;
+  --bg-card: #36171F;
+  --bg-card-hover: #401D27;
+  --bg-surface: #3E1C25;
+  --bg-surface-accent: #4C232E;
+  --bg-input: #30141B;
+
+  --border-subtle: #522530;
+  --border-strong: #723443;
+  --border-focus: #E9DDCE;
+
+  --text-primary: #FAF8F4;
+  --text-secondary: #EDE4D8;
+  --text-muted: #CFC0AF;
+  --text-inverse: #2B1218;
+
+  --accent-primary: #A66B77;
+  --accent-primary-hover: #C28E98;
+  --accent-secondary: #F3EBE1;
+  --accent-subtle: #401D27;
+  --accent-border: #A66B77;
+
+  --badge-bg: #441B26;
+  --badge-text: #FAF8F4;
+  --badge-border: #723443;
+}
+
+/* Dark Mode: Rich */
+[data-theme='dark'][data-intensity='rich'] {
+  --bg-app: #18060B;
+  --bg-sidebar: #120307;
+  --bg-navbar: #18060B;
+  --bg-card: #250910;
+  --bg-card-hover: #310D16;
+  --bg-surface: #2E0D16;
+  --bg-surface-accent: #3E131E;
+  --bg-input: #20070D;
+
+  --border-subtle: #4A1622;
+  --border-strong: #722F3E;
+  --border-focus: #F3EBE1;
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #FAF8F4;
+  --text-muted: #E9DDCE;
+  --text-inverse: #18060B;
+
+  --accent-primary: #722F3E;
+  --accent-primary-hover: #8C4B59;
+  --accent-secondary: #FAF8F4;
+  --accent-subtle: #310D16;
+  --accent-border: #8C4B59;
+
+  --badge-bg: #350E17;
+  --badge-text: #FFFFFF;
+  --badge-border: #722F3E;
+}

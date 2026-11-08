@@ -1,0 +1,126 @@
+{
+  "info": {
+    "name": "G-CIRCLE API Collection",
+    "description": "Complete Postman collection for G-CIRCLE: Discover. Collaborate. Build.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        },
+        {
+          "name": "2. Register Student",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aarav Sharma\",\n  \"studentId\": \"22SCSE1010045\",\n  \"email\": \"aarav.sharma@galgotiasuniversity.ac.in\",\n  \"password\": \"Password@123\",\n  \"confirmPassword\": \"Password@123\",\n  \"academicYear\": \"3rd Year\",\n  \"course\": \"B.Tech CSE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Verify Email (OTP)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/verify-email",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aarav.sharma@galgotiasuniversity.ac.in\",\n  \"otp\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4. Login",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aarav.sharma@galgotiasuniversity.ac.in\",\n  \"password\": \"Password@123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "1. Analyze Description (AI-Assisted)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/projects/analyze",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"CampusNav\",\n  \"description\": \"An AI indoor navigation web application built with React, FastAPI, Dijkstra pathfinding, and crowd estimation models.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Get All Projects",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/projects",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Matching Engine",
+      "item": [
+        {
+          "name": "1. Skill Gap Analysis",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/matching/projects/cc9c0ee4-c2bc-4353-81a3-d5460777d9fb/skill-gaps",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "2. Recommended Collaborators for Project",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/matching/projects/cc9c0ee4-c2bc-4353-81a3-d5460777d9fb/recommendations",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "3. Communication Matches",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/matching/communication-matches",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}
