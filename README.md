@@ -1,2 +1,2 @@
-# G---Circle
+# G-Circle
 University Collaboration Platform
