@@ -7,6 +7,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ============================================================
+// UNIVERSITY & DEPARTMENT
+// ============================================================
+
 model University {
   id          String       @id @default(uuid())
   name        String
@@ -31,8 +35,13 @@ model Department {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
+  @@index([universityId], map: "idx_departments_university_id")
   @@map("departments")
 }
+
+// ============================================================
+// USER MANAGEMENT
+// ============================================================
 
 model User {
   id             String      @id @default(uuid())
@@ -40,8 +49,8 @@ model User {
   studentId      String      @unique
   email          String      @unique
   password       String
-  academicYear   String      // "1st Year", "2nd Year", "3rd Year", "4th Year"
-  course         String      // "B.Tech CSE", "B.Tech IT", etc.
+  academicYear   String
+  course         String
   departmentId   String?
   department     Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   universityId   String?
@@ -51,39 +60,45 @@ model User {
   github         String?
   bio            String?
   experience     String?
-  availability   String?     @default("Flexible") // "Morning", "Afternoon", "Evening", "Flexible"
+  availability   String?     @default("Flexible")
   preferredRoles String[]    @default([])
   emailVerified  Boolean     @default(false)
-  role           String      @default("STUDENT")  // "STUDENT", "TEAM_LEADER", "ADMIN"
+  role           String      @default("STUDENT")
 
-  skills               UserSkill[]
-  interests            UserInterest[]
-  communicationSkills  UserCommunicationSkill[]
-  languages            UserLanguage[]
-  preferences          UserPreference?
-  createdProjects      Project[]                  @relation("ProjectCreator")
-  ledTeams             Team[]                     @relation("TeamLeader")
-  teamMemberships      TeamMember[]
-  teamRequests         TeamRequest[]
-  assignedTasks        Task[]                     @relation("TaskAssignee")
-  createdTasks         Task[]                     @relation("TaskCreator")
-  sentMessages         Message[]
-  notifications        Notification[]
-  givenFeedback        PeerFeedback[]             @relation("FeedbackFrom")
-  receivedFeedback     PeerFeedback[]             @relation("FeedbackTo")
-  passwordResetTokens  PasswordResetToken[]
-  showcaseVideos       ShowcaseVideo[]
+  skills              UserSkill[]
+  interests           UserInterest[]
+  communicationSkills UserCommunicationSkill[]
+  languages           UserLanguage[]
+  preferences         UserPreference?
+  createdProjects     Project[]                @relation("ProjectCreator")
+  ledTeams            Team[]                   @relation("TeamLeader")
+  teamMemberships     TeamMember[]
+  teamRequests        TeamRequest[]
+  assignedTasks       Task[]                   @relation("TaskAssignee")
+  createdTasks        Task[]                   @relation("TaskCreator")
+  sentMessages        Message[]
+  notifications       Notification[]
+  givenFeedback       PeerFeedback[]           @relation("FeedbackFrom")
+  receivedFeedback    PeerFeedback[]           @relation("FeedbackTo")
+  passwordResetTokens PasswordResetToken[]
+  showcaseVideos      ShowcaseVideo[]
 
-  createdAt            DateTime                   @default(now())
-  updatedAt            DateTime                   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@index([departmentId], map: "idx_users_department_id")
+  @@index([universityId], map: "idx_users_university_id")
   @@map("users")
 }
+
+// ============================================================
+// SKILLS MANAGEMENT
+// ============================================================
 
 model Skill {
   id            String         @id @default(uuid())
   name          String         @unique
-  category      String         // "Frontend", "Backend", "AI/ML", "DevOps", "Database", "Design", "Mobile", "Other"
+  category      String
   description   String?
   userSkills    UserSkill[]
   projectSkills ProjectSkill[]
@@ -99,11 +114,12 @@ model UserSkill {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   skillId     String
   skill       Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  proficiency Int      // 1=Beginner, 2=Intermediate, 3=Advanced, 4=Expert
+  proficiency Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@unique([userId, skillId])
+  @@index([skillId], map: "idx_user_skills_skill_id")
   @@map("user_skills")
 }
 
@@ -118,25 +134,30 @@ model UserInterest {
   @@map("user_interests")
 }
 
+// ============================================================
+// PROJECT MANAGEMENT
+// ============================================================
+
 model Project {
-  id                       String                            @id @default(uuid())
+  id                       String                           @id @default(uuid())
   title                    String
   description              String
-  projectType              String                            // "Hackathon", "Academic", "Research", "Open Source", "Startup", "Competition"
-  requiredTeamSize         Int                               @default(4)
-  difficulty               String                            @default("Intermediate") // "Beginner", "Intermediate", "Advanced", "Expert"
+  projectType              String
+  requiredTeamSize         Int                              @default(4)
+  difficulty               String                           @default("Intermediate")
   deadline                 DateTime?
-  status                   String                            @default("RECRUITING") // "RECRUITING", "IN_PROGRESS", "COMPLETED"
+  status                   String                           @default("RECRUITING")
   creatorId                String
-  creator                  User                              @relation("ProjectCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  creator                  User                             @relation("ProjectCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   skills                   ProjectSkill[]
   roles                    ProjectRole[]
   team                     Team?
   communicationRequirement ProjectCommunicationRequirement?
   repositories             Repository[]
-  createdAt                DateTime                          @default(now())
-  updatedAt                DateTime                          @updatedAt
+  createdAt                DateTime                         @default(now())
+  updatedAt                DateTime                         @updatedAt
 
+  @@index([creatorId], map: "idx_projects_creator_id")
   @@map("projects")
 }
 
@@ -146,10 +167,11 @@ model ProjectSkill {
   project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   skillId    String
   skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  importance Int      @default(3) // 1 to 5
+  importance Int      @default(3)
   createdAt  DateTime @default(now())
 
   @@unique([projectId, skillId])
+  @@index([skillId], map: "idx_project_skills_skill_id")
   @@map("project_skills")
 }
 
@@ -161,8 +183,26 @@ model ProjectRole {
   openCount Int      @default(1)
   createdAt DateTime @default(now())
 
+  @@index([projectId], map: "idx_project_roles_project_id")
   @@map("project_roles")
 }
+
+model Repository {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  repoUrl   String
+  provider  String   @default("GITHUB")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId], map: "idx_repositories_project_id")
+  @@map("repositories")
+}
+
+// ============================================================
+// TEAM MANAGEMENT
+// ============================================================
 
 model Team {
   id            String         @id @default(uuid())
@@ -179,6 +219,7 @@ model Team {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
+  @@index([leaderId], map: "idx_teams_leader_id")
   @@map("teams")
 }
 
@@ -192,6 +233,7 @@ model TeamMember {
   joinedAt DateTime @default(now())
 
   @@unique([teamId, userId])
+  @@index([userId], map: "idx_team_members_user_id")
   @@map("team_members")
 }
 
@@ -202,13 +244,18 @@ model TeamRequest {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   message   String?
-  status    String   @default("PENDING") // "PENDING", "ACCEPTED", "REJECTED"
+  status    String   @default("PENDING")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([teamId, userId])
+  @@index([userId], map: "idx_team_requests_user_id")
   @@map("team_requests")
 }
+
+// ============================================================
+// TASK MANAGEMENT
+// ============================================================
 
 model Task {
   id           String    @id @default(uuid())
@@ -218,16 +265,23 @@ model Task {
   description  String?
   assignedToId String?
   assignedTo   User?     @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
-  priority     String    @default("MEDIUM") // "LOW", "MEDIUM", "HIGH", "URGENT"
-  status       String    @default("TODO")   // "TODO", "IN_PROGRESS", "DONE"
+  priority     String    @default("MEDIUM")
+  status       String    @default("TODO")
   dueDate      DateTime?
   createdById  String
   createdBy    User      @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  @@index([assignedToId], map: "idx_tasks_assigned_to_id")
+  @@index([createdById], map: "idx_tasks_created_by_id")
+  @@index([teamId], map: "idx_tasks_team_id")
   @@map("tasks")
 }
+
+// ============================================================
+// MESSAGING
+// ============================================================
 
 model Message {
   id        String   @id @default(uuid())
@@ -238,8 +292,14 @@ model Message {
   content   String
   createdAt DateTime @default(now())
 
+  @@index([senderId], map: "idx_messages_sender_id")
+  @@index([teamId], map: "idx_messages_team_id")
   @@map("messages")
 }
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
 
 model Notification {
   id        String   @id @default(uuid())
@@ -247,25 +307,18 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String
   message   String
-  type      String   @default("SYSTEM") // "JOIN_REQUEST", "REQUEST_ACCEPTED", "REQUEST_REJECTED", "TASK_ASSIGNED", "SYSTEM"
+  type      String   @default("SYSTEM")
   read      Boolean  @default(false)
   link      String?
   createdAt DateTime @default(now())
 
+  @@index([userId], map: "idx_notifications_user_id")
   @@map("notifications")
 }
 
-model Repository {
-  id        String   @id @default(uuid())
-  projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  repoUrl   String
-  provider  String   @default("GITHUB")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("repositories")
-}
+// ============================================================
+// COMMUNICATION SKILLS
+// ============================================================
 
 model CommunicationSkill {
   id          String                   @id @default(uuid())
@@ -283,18 +336,23 @@ model UserCommunicationSkill {
   user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   communicationSkillId String
   communicationSkill   CommunicationSkill @relation(fields: [communicationSkillId], references: [id], onDelete: Cascade)
-  proficiency          Int                @default(3) // 1 to 4
+  proficiency          Int                @default(3)
   createdAt            DateTime           @default(now())
 
   @@unique([userId, communicationSkillId])
+  @@index([communicationSkillId], map: "idx_user_communication_skills_skill_id")
   @@map("user_communication_skills")
 }
+
+// ============================================================
+// USER LANGUAGES & PREFERENCES
+// ============================================================
 
 model UserLanguage {
   id          String   @id @default(uuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  language    String   // "English", "Hindi", "Other"
+  language    String
   proficiency String   @default("Fluent")
   createdAt   DateTime @default(now())
 
@@ -308,15 +366,19 @@ model UserPreference {
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   communicationMethods String[] @default(["Text-based communication", "Voice discussions"])
   collaborationStyle   String   @default("Brainstorming together")
-  availability         String   @default("Flexible") // "Morning", "Afternoon", "Evening", "Flexible"
-  themeMode            String   @default("light")    // "light", "dark", "system"
-  themeIntensity       String   @default("classic")  // "soft", "classic", "rich"
+  availability         String   @default("Flexible")
+  themeMode            String   @default("light")
+  themeIntensity       String   @default("classic")
   emailNotifications   Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
   @@map("user_preferences")
 }
+
+// ============================================================
+// PROJECT COMMUNICATION REQUIREMENTS
+// ============================================================
 
 model ProjectCommunicationRequirement {
   id               String   @id @default(uuid())
@@ -330,10 +392,14 @@ model ProjectCommunicationRequirement {
   @@map("project_communication_requirements")
 }
 
+// ============================================================
+// EMAIL VERIFICATION
+// ============================================================
+
 model EmailVerification {
   id        String   @id @default(uuid())
   email     String
-  otp       String
+  otpHash   String   @map("otp")
   token     String   @unique
   expiresAt DateTime
   attempts  Int      @default(0)
@@ -342,6 +408,10 @@ model EmailVerification {
 
   @@map("email_verifications")
 }
+
+// ============================================================
+// PASSWORD RESET
+// ============================================================
 
 model PasswordResetToken {
   id        String   @id @default(uuid())
@@ -352,8 +422,13 @@ model PasswordResetToken {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  @@index([userId], map: "idx_password_reset_tokens_user_id")
   @@map("password_reset_tokens")
 }
+
+// ============================================================
+// PEER FEEDBACK
+// ============================================================
 
 model PeerFeedback {
   id         String   @id @default(uuid())
@@ -363,29 +438,36 @@ model PeerFeedback {
   toUser     User     @relation("FeedbackTo", fields: [toUserId], references: [id], onDelete: Cascade)
   teamId     String
   team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  rating     Int      // 1 to 5
+  rating     Int
   comment    String?
   createdAt  DateTime @default(now())
 
+  @@index([fromUserId], map: "idx_peer_feedback_from_user_id")
+  @@index([teamId], map: "idx_peer_feedback_team_id")
+  @@index([toUserId], map: "idx_peer_feedback_to_user_id")
   @@map("peer_feedback")
 }
+
+// ============================================================
+// SHOWCASE VIDEOS
+// ============================================================
 
 model ShowcaseVideo {
   id           String   @id @default(uuid())
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title        String
-  category     String   // "Self Introduction", "Public Speaking", etc.
+  category     String
   description  String?
-  storageKey   String   // local file path or key
-  videoUrl     String   // streaming URL or relative path
+  storageKey   String
+  videoUrl     String
   thumbnailUrl String?
-  duration     Int      @default(60) // in seconds
+  duration     Int      @default(60)
   skillTags    String[] @default([])
-  visibility   String   @default("PUBLIC") // "PUBLIC", "TEAM_ONLY", "PRIVATE"
+  visibility   String   @default("PUBLIC")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  @@index([userId], map: "idx_showcase_videos_user_id")
   @@map("showcase_videos")
 }
-

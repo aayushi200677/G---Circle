@@ -8,54 +8,49 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
-// Security middleware
 app.use(helmet());
 
-// CORS configuration
-const allowedOrigins = [
+const allowedOrigins = new Set([
   process.env.CLIENT_URL || 'http://localhost:5173',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-];
+]);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or Postman)
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(null, true); // Permissive in dev for smooth local workflow
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
-// Request parsing
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-// Logging
+// Log only the path, never query parameters (password-reset tokens may be in the query string).
 if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan('dev'));
+  app.use(morgan((tokens, req, res) => [
+    tokens.method(req, res),
+    req.path,
+    tokens.status(req, res),
+    `${tokens['response-time'](req, res)} ms`,
+  ].join(' ')));
 }
 
-// Global rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Reasonable limit
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     success: false,
-    message: 'Too many requests from this IP, please try again after 15 minutes',
+    message: 'Too many requests from this IP. Please try again later.',
   },
 });
-app.use('/api', limiter);
+app.use('/api', apiLimiter);
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
@@ -65,18 +60,15 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Master API Routes
 app.use('/api', apiRouter);
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: `API route not found: ${req.method} ${req.originalUrl}`,
+    message: `API route not found: ${req.method} ${req.path}`,
   });
 });
 
-// Centralized error handler
 app.use(errorHandler);
 
 export default app;
