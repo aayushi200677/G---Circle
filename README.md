@@ -3,7 +3,7 @@
 > **G-CIRCLE** is a university collaboration ecosystem built for Galgotias University that connects students based on their technical skills, communication abilities, academic interests, experience, and complementary strengths.
 
 Instead of simple keyword or similarity matching, G-CIRCLE prioritises **COMPLEMENTARY TEAM FORMATION** — discovering collaborators who fill the collective missing technical and communication gaps of a project team.
-
+ 
 ---
 
 ## 🏛️ Platform Highlights & Unique Selling Proposition (USP)
