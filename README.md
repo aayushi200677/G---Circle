@@ -122,89 +122,377 @@ G-Circle/
 
 ---
 
-## ⚙️ Installation & Setup Guide
+# 🚀 Installation & Setup Guide
 
-### 1. Prerequisites
-- **Node.js**: v18+ or v24+
-- **npm**: v9+
+Follow these steps to download, configure, and run **G-Circle** on your local machine.
 
-### 2. Clone / Open Repository
+## 1. Prerequisites
+
+Make sure you have installed the following software:
+
+| Software | Purpose | Download |
+|---|---|---|
+| Node.js (LTS) | Run JavaScript applications | [Download](https://nodejs.org/) |
+| npm | Install project dependencies | Included with Node.js |
+| PostgreSQL | Database management | [Download](https://www.postgresql.org/download/) |
+| pgAdmin | Manage PostgreSQL databases | [Download](https://www.pgadmin.org/download/) |
+| Git | Clone the repository | [Download](https://git-scm.com/downloads) |
+| VS Code | Code editor | [Download](https://code.visualstudio.com/) |
+
+Verify your installations:
+
 ```bash
-cd "c:\Users\aayus\OneDrive\Desktop\G-Circle"
+node --version
+npm --version
+git --version
 ```
 
-### 3. Install Dependencies
-Run from root (or install in client and server):
+## 2. Clone the Repository
+
+Open your terminal and run:
+
+```bash
+git clone https://github.com/OWNER/REPOSITORY.git
+```
+
+Replace `OWNER/REPOSITORY` with the actual GitHub repository path.
+
+Navigate to the project directory:
+
+```bash
+cd G-Circle
+```
+
+## 3. Install Dependencies
+
+G-Circle has separate dependencies for the root project, frontend, and backend.
+
+Run these commands from the project root:
+
 ```bash
 npm install
-npm --prefix server install
 npm --prefix client install
+npm --prefix server install
 ```
 
-### 4. Database Setup (PostgreSQL 18)
-G-CIRCLE is configured to connect to PostgreSQL on port `5432` with connection URL:
-```
-DATABASE_URL="postgresql://postgres:password@localhost:5432/gcircle?schema=public"
+Wait for all dependencies to finish installing.
+
+## 4. Set Up PostgreSQL Database
+
+G-Circle uses PostgreSQL to store user accounts, student profiles, skills, projects, and other application data.
+
+### Step 1: Create a Database
+
+1. Open pgAdmin.
+2. Connect to your PostgreSQL server.
+3. Right-click **Databases**.
+4. Select **Create → Database**.
+5. Enter the database name:
+
+```text
+g_circle_new
 ```
 
-> **Zero Friction Local PostgreSQL**:
-> If you do not have an external PostgreSQL instance running, G-CIRCLE includes an automated PostgreSQL runner powered by `embedded-postgres`:
-> ```bash
-> npm run db:start
-> ```
-> This automatically downloads native PostgreSQL binaries, initializes data files in `server/data/postgres/`, creates the `gcircle` database, and serves it on `127.0.0.1:5432`.
+6. Click **Save**.
 
-### 5. Run Migrations & Seed Data
-Push the Prisma schema to PostgreSQL and seed rich sample data:
+### Step 2: Note Your Database Credentials
+
+You will need:
+
+- PostgreSQL username
+- PostgreSQL password
+- Host (usually `localhost`)
+- Port (commonly `5432`)
+- Database name (`g_circle_new`)
+
+Your PostgreSQL port may be different. Use the port configured on your computer.
+
+## 5. Configure Environment Variables
+
+Environment variables store configuration values such as database credentials, authentication secrets, and email settings.
+
+**Never upload your actual `.env` files to GitHub.**
+
+### Step 1: Create the Root Environment File
+
+Copy the root `.env.example` file and rename the copy to:
+
+```text
+.env
+```
+
+### Step 2: Create the Server Environment File
+
+Inside the `server` directory, copy:
+
+```text
+server/.env.example
+```
+
+Rename the copy to:
+
+```text
+server/.env
+```
+
+### Step 3: Configure Server Environment Variables
+
+Open `server/.env` and configure the required values.
+
+Example:
+
+```env
+PORT=5002
+NODE_ENV=development
+
+DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/g_circle_new?schema=public"
+
+JWT_SECRET="YOUR_SECURE_JWT_SECRET"
+JWT_EXPIRES_IN="7d"
+
+CLIENT_URL="http://localhost:5173"
+
+EMAIL_SERVICE_ENABLED=true
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-gmail@gmail.com
+EMAIL_PASS=your-google-app-password
+EMAIL_FROM="G-Circle <your-gmail@gmail.com>"
+
+OTP_HASH_SECRET=YOUR_RANDOM_SECRET
+```
+
+Replace all placeholder values with your own credentials.
+
+**Important:**
+- Make sure the database port matches your PostgreSQL configuration.
+- Use a strong, unique JWT secret.
+- Use a Google App Password for Gmail SMTP instead of your regular Gmail password.
+- Keep `OTP_HASH_SECRET` private and stable. Changing it can invalidate pending OTP verification records.
+
+### Step 4: Generate OTP Hash Secret
+
+Run this command in your terminal:
+
 ```bash
-# Push 24 relational tables to PostgreSQL
-npm --prefix server run db:push
-
-# Seed Galgotias University students, skills, projects, and Kanban tasks
-npm --prefix server run db:seed
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
----
+Copy the generated value into `server/.env`:
 
-## 🚀 Running the Application
+```env
+OTP_HASH_SECRET=your_generated_secret
+```
 
-### Option A: Run Full-Stack Concurrently
-From the project root:
+Do not share or commit this secret.
+
+### Step 5: Configure Gmail SMTP
+
+To enable email OTP delivery:
+
+1. Use a Gmail account.
+2. Enable 2-Step Verification if required.
+3. Generate a Google App Password.
+4. Add the Gmail address and App Password to `server/.env`.
+
+Refer to Google's documentation: [Google App Passwords](https://support.google.com/accounts/answer/185833).
+
+## 6. Configure Prisma and Database Tables
+
+G-Circle uses Prisma ORM to communicate with PostgreSQL.
+
+Open a terminal and navigate to the server directory:
+
+```bash
+cd server
+```
+
+Format the Prisma schema:
+
+```bash
+npx prisma format
+```
+
+Validate the schema:
+
+```bash
+npx prisma validate
+```
+
+Generate Prisma Client:
+
+```bash
+npm run db:generate
+```
+
+### Create Database Tables
+
+For a new, empty local development database, run:
+
+```bash
+npx prisma db push
+```
+
+This synchronizes your PostgreSQL database structure with the Prisma schema.
+
+**Important:**
+- Confirm that `DATABASE_URL` points to your local development database.
+- Do not run this command against a production database.
+- If the repository provides a Prisma migration history, follow its migration instructions instead of blindly using `db push`.
+
+After successful setup, you can inspect the database tables using pgAdmin.
+
+## 7. Start the Backend
+
+Make sure your terminal is inside the `server` directory.
+
+Run:
+
 ```bash
 npm run dev
 ```
 
-### Option B: Run Services Separately
-In Terminal 1 (Backend API on `http://localhost:5001`):
-```bash
-npm run server
+The backend should start on:
+
+```text
+http://localhost:5002
 ```
 
-In Terminal 2 (Frontend Client on `http://localhost:5173`):
-```bash
-npm run client
+### Verify Backend Status
+
+Open this URL in your browser:
+
+```text
+http://localhost:5002/api/health
 ```
 
-Open your browser to: **`http://localhost:5173`**
+A successful response should look similar to:
+
+```json
+{
+  "status": "online",
+  "platform": "G-CIRCLE",
+  "tagline": "Discover. Collaborate. Build."
+}
+```
+
+Keep the backend terminal running.
+
+## 8. Start the Frontend
+
+Open a **new terminal**.
+
+Navigate to the client directory:
+
+```bash
+cd client
+```
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+The frontend will usually be available at:
+
+```text
+http://localhost:5173
+```
+
+Open the URL displayed in your terminal.
+
+Keep both frontend and backend terminals running.
+
+## 9. Test the Application
+
+Once both applications are running, test the following features:
+
+- [ ] Register a new account.
+- [ ] Receive an email OTP.
+- [ ] Verify your email address.
+- [ ] Log in successfully.
+- [ ] Create or update your student profile.
+- [ ] Add technical skills.
+- [ ] Explore Find Teammates.
+- [ ] Explore Project Collaboration.
+- [ ] Test team and project workflows that are enabled.
+
+Some features may require multiple test accounts or existing student records.
+
+## 10. Troubleshooting
+
+### Database Connection Error
+
+Check:
+- PostgreSQL is running.
+- Database name is correct.
+- Username and password are correct.
+- PostgreSQL port matches `DATABASE_URL`.
+
+### Prisma Client Error
+
+Run from the `server` directory:
+
+```bash
+npm run db:generate
+```
+
+Restart the backend afterward.
+
+### OTP Email Not Received
+
+Check:
+- `EMAIL_SERVICE_ENABLED=true`
+- Gmail address is correct.
+- Google App Password is correct.
+- SMTP host and port are configured correctly.
+- Spam folder.
+
+### Frontend Cannot Connect to Backend
+
+Check:
+- Backend is running.
+- Frontend API base URL is correct.
+- CORS configuration allows the frontend origin.
+- Frontend and backend ports are configured correctly.
+
+### Port Already in Use
+
+Another application may already be using the configured port. Stop that process or configure an available port and update related frontend API and CORS settings.
+
+## 11. Security Guidelines
+
+- Never commit `.env` files.
+- Never upload database passwords or Gmail App Passwords.
+- Never share JWT or OTP hashing secrets.
+- Do not expose database credentials in frontend code.
+- Use a separate database for local development.
+- Do not use development credentials in production.
+
+## 12. Useful Commands
+
+| Purpose | Command |
+|---|---|
+| Install root dependencies | `npm install` |
+| Install frontend dependencies | `npm --prefix client install` |
+| Install backend dependencies | `npm --prefix server install` |
+| Format Prisma schema | `npx prisma format` |
+| Validate Prisma schema | `npx prisma validate` |
+| Generate Prisma Client | `npm run db:generate` |
+| Synchronize database | `npx prisma db push` |
+| Start backend | `npm run dev` (inside `server`) |
+| Start frontend | `npm run dev` (inside `client`) |
 
 ---
 
-## 🔑 Pre-Seeded Student Demo Accounts
+## 🎉 Setup Complete!
 
-All accounts use password: **`Password@123`**
+You have successfully configured the G-Circle development environment.
 
-| Student Name | University Email | Academic Role | Key Strengths |
-| :--- | :--- | :--- | :--- |
-| **Aarav Sharma** | `aarav.sharma@galgotiasuniversity.ac.in` | B.Tech CSE, 3rd Year | React.js (Expert), UI/UX (Adv), Team Leader |
-| **Priya Patel** | `priya.patel@galgotiasuniversity.ac.in` | B.Tech CSE, 3rd Year | Node.js (Expert), PostgreSQL (Expert), Backend Lead |
-| **Rohan Verma** | `rohan.verma@galgotiasuniversity.ac.in` | B.Tech CSE, 2nd Year | Machine Learning (Expert), Python (Expert), AI Specialist |
-| **Ananya Singh** | `ananya.singh@galgotiasuniversity.ac.in` | B.Tech ECE, 4th Year | Public Speaking (Expert), Presentation (Expert), Coordinator |
-| **Devansh Gupta** | `devansh.gupta@galgotiasuniversity.ac.in` | MCA, 2nd Year | Docker (Expert), Full-Stack, Technical Explanation |
-| **Ishita Roy** | `ishita.roy@galgotiasuniversity.ac.in` | BBA, 2nd Year | Product Management, Presentation, Leadership |
+**Discover. Collaborate. Build.**
 
-*(Clickable demo login pills are also provided right on the Login screen for instant one-click login during testing.)*
 
----
 
 ## 🧮 Matching Engine Algorithm Details
 
