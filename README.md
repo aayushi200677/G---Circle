@@ -20,15 +20,16 @@ Instead of simple keyword or similarity matching, G-CIRCLE prioritises **COMPLEM
    - Evaluates self-declared communication strengths, collaboration styles, preferred communication channels, and availability.
 
 3. **Integrated Team Workspace & Sprint Kanban**:
+4. 
    - Team workspaces with three-column Kanban sprint boards (`TO DO`, `IN PROGRESS`, `DONE`).
    - Assign members, track deadlines, set task priorities (`LOW`, `MEDIUM`, `HIGH`, `URGENT`), and update statuses with real-time progress calculations.
 
-4. **University Identity & Security**:
+5. **University Identity & Security**:
    - Restricted exclusively to `@galgotiasuniversity.ac.in` email addresses (validated on both client and server).
    - Email verification with expiring 6-digit OTPs and rate limiting.
    - Password hashing with `bcrypt` (10 rounds) and stateless JWT authentication.
 
-5. **Strict Elegant University Palette**:
+6. **Strict Elegant University Palette**:
    - Strictly built using **Burgundy** (`#722F3E`, `#51212E`), **Warm Beige** (`#E9DDCE`, `#F3EBE1`), and **Ivory** (`#FAF8F4`, `#FFFFFF`).
    - Strict contrast rule: Dark text on light surfaces; light text on dark surfaces.
    - Dedicated **Theme & Appearance** customizer in Settings supporting **Light Mode**, **Dark Mode**, and **System Default**, across **Soft**, **Classic**, and **Rich** intensities.
